@@ -1,0 +1,48 @@
+diff -Nura src/drivers/scr_server/scr_server.cpp src/drivers/scr_server/scr_server.cpp
+--- src/drivers/scr_server/scr_server.cpp	2014-10-27 11:33:43.003796000 -0200
++++ src/drivers/scr_server/scr_server.cpp	2014-10-27 14:31:21.729464962 -0200
+@@ -565,6 +565,8 @@
+         if (carCtrl.getMeta()==RACE_RESTART)
+         {
+          	RESTARTING[index] = 1;
++            car->ctrl.askRestart = true;
++            std::cerr << "Restarting the race" << endl;
+ #ifdef __DISABLE_RESTART__
+ 	        char line[UDP_MSGLEN];
+         	sprintf(line,"***restart***");
+diff -Nura src/interfaces/car.h src/interfaces/car.h
+--- src/interfaces/car.h	2014-10-27 11:33:43.007796000 -0200
++++ src/interfaces/car.h	2014-10-27 11:37:14.683789748 -0200
+@@ -359,6 +359,7 @@
+     int		lightCmd;    /**< Lights command */
+ #define RM_LIGHT_HEAD1		0x00000001	/**< head light 1 */
+ #define RM_LIGHT_HEAD2		0x00000002	/**< head light 2 */
++    int     askRestart;
+ } tCarCtrl;
+ #define _steerCmd	ctrl.steer
+ #define _accelCmd	ctrl.accelCmd
+diff -Nura src/libs/raceengineclient/raceengine.cpp src/libs/raceengineclient/raceengine.cpp
+--- src/libs/raceengineclient/raceengine.cpp	2014-10-27 11:33:43.007796000 -0200
++++ src/libs/raceengineclient/raceengine.cpp	2014-10-27 11:39:00.827786612 -0200
+@@ -615,6 +615,21 @@
+ 	tRobotItf *robot;
+ 	tSituation *s = ReInfo->s;
+ 
++	bool restartRequested = false;
++
++	for (i = 0; i < s->_ncars; i++) {
++	    if(s->cars[i]->ctrl.askRestart) {
++	        restartRequested = true;
++	        s->cars[i]->ctrl.askRestart = false;
++	    }
++	}
++   
++    if(restartRequested){   
++        ReRaceCleanup();
++        ReInfo->_reState = RE_STATE_PRE_RACE;
++        GfuiScreenActivate(ReInfo->_reGameScreen);
++    }
++
+ 	if ((ReInfo->_displayMode != RM_DISP_MODE_NONE) && (ReInfo->_displayMode != RM_DISP_MODE_CONSOLE)) {
+ 		if (floor(s->currentTime) == -2.0) {
+ 			ReRaceBigMsgSet("Ready", 1.0);
