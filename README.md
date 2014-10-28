@@ -19,4 +19,4 @@ Follow this steps for correctly use the scr-meta-restart
 * Copy the package scr-meta-restart in your base TORCS directory
 * Enter the cr-meta-restart directory
 * run the script do_patch, sh do_patch.sh
-* Move to the parent diretory and contunue your installation
+* Move to the parent diretory and continue your TORCS's installation
